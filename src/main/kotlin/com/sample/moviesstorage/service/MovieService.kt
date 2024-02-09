@@ -1,13 +1,13 @@
 package com.sample.moviesstorage.service
 
-import com.sample.moviesstorage.dto.Movie
+import com.sample.moviesstorage.entities.MovieEntity
 import java.time.LocalDate
 import java.util.*
 
 interface MovieService {
-    fun retrieveAllMovies(startDate: LocalDate? = null, screenType: String? = null):List<Movie>
+    fun retrieveAllMovies(startDate: LocalDate? = null, screenType: String? = null):List<MovieEntity>
 
-    fun retriveMovie(movieId:Long):Optional<Movie>
+    fun retriveMovie(movieId:Long):Optional<MovieEntity>
 
-    fun updateMovie(movieId: Long,updatedMovie: Movie)
+    fun updateMovie(movieId: Long,updatedMovie: MovieEntity)
 }

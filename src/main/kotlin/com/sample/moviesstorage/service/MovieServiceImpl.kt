@@ -1,7 +1,5 @@
 package com.sample.moviesstorage.service
 
-import com.sample.moviesstorage.dto.Movie
-import com.sample.moviesstorage.dto.MovieSlot
 import com.sample.moviesstorage.entities.MovieEntity
 import com.sample.moviesstorage.entities.MovieSlotEntity
 import com.sample.moviesstorage.repository.MovieEntityRepository
@@ -19,42 +17,33 @@ import java.util.*
 class MovieServiceImpl(private val movieEntityRepository: MovieEntityRepository) :
     MovieService {
     @Cacheable
-    override fun retrieveAllMovies(startDate: LocalDate?, screenType: String?): List<Movie> {
+    override fun retrieveAllMovies(startDate: LocalDate?, screenType: String?): List<MovieEntity> {
         Thread.sleep(500)
+
         val moviesList =
-            isAfterThanOrEqualTo(startDate)?.let { it ->
-                movieEntityRepository.findAll(
-                    it
-                )
-                    .filter { movieEntity -> screenType isNullOr { movieEntity.screen == screenType } }
-                    .map { movie ->
-                        Movie(
-                            movie.name,
-                            slot = movie.slots
-                                .map { slot -> MovieSlot(slot.date.toString(), slot.time) }.toList(),
-                            screen = movie.screen
+            when (startDate) {
+                null -> movieEntityRepository.findAll()
+                else ->
+                    isAfterThanOrEqualTo(startDate)?.let {
+                        movieEntityRepository.findAll(
+                            it
                         )
-                    }.toList()
+                    }
             }
-        return moviesList.orEmpty()
+
+        return moviesList?.filter { movieEntity -> screenType isNullOr { movieEntity.screen == screenType } }
+            ?.toList().orEmpty()
     }
 
     @Cacheable(key = "#movieId")
-    override fun retriveMovie(movieId: Long): Optional<Movie> {
-        return movieEntityRepository.findById(movieId).map { movie ->
-            Movie(
-                movie.name, slot = movie.slots
-                    .map { slot -> MovieSlot(slot.date.toString(), slot.time) }.toList(), screen = movie.screen
-            )
-        }
+    override fun retriveMovie(movieId: Long): Optional<MovieEntity> {
+        return movieEntityRepository.findById(movieId)
     }
 
-    @CachePut(key = "#movieId")
-    override fun updateMovie(movieId: Long, updatedMovie: Movie) {
-        var movieEntity = movieEntityRepository.findById(movieId)
-            .orElseThrow { RuntimeException("No such user exists") }
-        BeanUtils.copyProperties(updatedMovie, movieEntity)
-        movieEntityRepository.save(movieEntity)
+    override fun updateMovie(movieId: Long, updatedMovie: MovieEntity) {
+        movieEntityRepository.findById(movieId)
+            .orElseThrow { RuntimeException("No such movie present") }
+        movieEntityRepository.save(updatedMovie)
     }
 
     fun isAfterThanOrEqualTo(startDate: LocalDate?): Specification<MovieEntity>? {
