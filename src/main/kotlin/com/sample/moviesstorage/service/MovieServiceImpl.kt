@@ -3,9 +3,7 @@ package com.sample.moviesstorage.service
 import com.sample.moviesstorage.entities.MovieEntity
 import com.sample.moviesstorage.entities.MovieSlotEntity
 import com.sample.moviesstorage.repository.MovieEntityRepository
-import org.springframework.beans.BeanUtils
 import org.springframework.cache.annotation.CacheConfig
-import org.springframework.cache.annotation.CachePut
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.data.jpa.domain.Specification
 import org.springframework.stereotype.Service
@@ -47,7 +45,6 @@ class MovieServiceImpl(private val movieEntityRepository: MovieEntityRepository)
     }
 
     fun isAfterThanOrEqualTo(startDate: LocalDate?): Specification<MovieEntity>? {
-
         return if (startDate != null) {
             Specification<MovieEntity> { root, cq, cb ->
                 val movieEntityEqual = root.join<MovieEntity, MovieSlotEntity>("slots")
